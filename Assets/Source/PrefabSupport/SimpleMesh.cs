@@ -6,12 +6,12 @@ public class SimpleMesh : MonoBehaviour {
 
     protected Mesh mesh;
     public int widthRes = 4; //Number of vertexes horizontally
-    public int heightRes = 3; //Number of vertexes vertically
-    public float worldWidth = 6;
+    public int heightRes = 4; //Number of vertexes vertically
+    public float worldWidth = 4;
     public float worldHeight = 4;
     protected GameObject[] vertexObjects;
     protected GameObject[] normalObjects;
-
+    private Vector2[] uv_list;
     private void Awake()
     {
         mesh = GetComponent<MeshFilter>().mesh;
@@ -20,6 +20,7 @@ public class SimpleMesh : MonoBehaviour {
     // Use this for initialization
     void Start () {
         Initialize();
+
 	}
 
     private int[] adjacentSequence = { -5, -4, -3, 1, 5, 4, 3, -1, -5 };
@@ -271,7 +272,28 @@ public class SimpleMesh : MonoBehaviour {
         mesh.Clear(); //Clear existing mesh
         SetupVertices();
         CreateTriangles();
-        VertexMeld();
+        VertexMeld();       
+        uv_list = new Vector2[widthRes*heightRes]; //need a UV for each vertex
+        mapUV();
+        mesh.uv = uv_list;
+        GetComponent<TexturePlacement>().SaveInitUV(uv_list);
+    }
+
+    private void mapUV()
+    {
+        float x_step = 1 / ((float)widthRes - 1);
+        float y_step = 1 / ((float)heightRes - 1);
+        int uv_index = 0;
+        for (float y_v = 0; y_v < heightRes; y_v++)
+        {
+            float y_pos = y_v * y_step;
+            for (float x_v = 0; x_v < widthRes; x_v++)
+            {
+                float x_pos = x_v * x_step;
+                uv_list[uv_index] = new Vector2(x_pos, y_pos);
+                uv_index++;
+            }
+        }        
     }
 
     //Updates triangles on the seem of a cylinder to use the opposite seem vertexes
